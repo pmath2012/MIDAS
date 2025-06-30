@@ -1,0 +1,34 @@
+metric,test,statistic,p_value
+dice,Kruskal-Wallis,98.40721446228338,2.1472361639926185e-20
+precision,Kruskal-Wallis,68.96417602865509,3.7551615005516916e-14
+recall,Kruskal-Wallis,99.56807510506025,1.2156104652547868e-20
+dice,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_75_synth_25,874461.5,0.006274308633585351
+dice,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_50_synth_50,890137.0,0.00012778058207644127
+dice,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_25_synth_75,860189.5,0.07530033519998353
+dice,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_0_synth_100,966555.5,1.8079318087910736e-21
+dice,Mann-Whitney vit_50_real_75_synth_25 vs vit_50_real_50_synth_50,850224.5,0.24225187970357231
+dice,Mann-Whitney vit_50_real_75_synth_25 vs vit_50_real_25_synth_75,819501.0,0.34741792048514575
+dice,Mann-Whitney vit_50_real_75_synth_25 vs vit_50_real_0_synth_100,928325.5,2.3109100857987116e-12
+dice,Mann-Whitney vit_50_real_50_synth_50 vs vit_50_real_25_synth_75,803623.0,0.04033953797276358
+dice,Mann-Whitney vit_50_real_50_synth_50 vs vit_50_real_0_synth_100,909574.5,8.688397521116582e-09
+dice,Mann-Whitney vit_50_real_25_synth_75 vs vit_50_real_0_synth_100,938261.0,1.256505202256607e-14
+precision,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_75_synth_25,872742.0,0.008822512482647473
+precision,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_50_synth_50,885759.0,0.00040702865241745804
+precision,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_25_synth_75,861636.5,0.0608575309029526
+precision,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_0_synth_100,945366.5,1.222030438381772e-15
+precision,Mann-Whitney vit_50_real_75_synth_25 vs vit_50_real_50_synth_50,847724.0,0.3191510407163496
+precision,Mann-Whitney vit_50_real_75_synth_25 vs vit_50_real_25_synth_75,822531.0,0.4630109520170672
+precision,Mann-Whitney vit_50_real_75_synth_25 vs vit_50_real_0_synth_100,910694.5,1.1136451785103087e-08
+precision,Mann-Whitney vit_50_real_50_synth_50 vs vit_50_real_25_synth_75,809180.0,0.09553626341002315
+precision,Mann-Whitney vit_50_real_50_synth_50 vs vit_50_real_0_synth_100,894536.0,3.8477479674598835e-06
+precision,Mann-Whitney vit_50_real_25_synth_75 vs vit_50_real_0_synth_100,917998.0,4.931559674388693e-10
+recall,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_75_synth_25,872308.5,0.009597856596005504
+recall,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_50_synth_50,889819.0,0.00013938930900802516
+recall,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_25_synth_75,862728.0,0.05155889679520441
+recall,Mann-Whitney vit_50_real_100_synth_0 vs vit_50_real_0_synth_100,967690.0,8.265301696765294e-22
+recall,Mann-Whitney vit_50_real_75_synth_25 vs vit_50_real_50_synth_50,851823.0,0.20051304042759133
+recall,Mann-Whitney vit_50_real_75_synth_25 vs vit_50_real_25_synth_75,823770.5,0.5158676058265494
+recall,Mann-Whitney vit_50_real_75_synth_25 vs vit_50_real_0_synth_100,930322.5,7.963644962966892e-13
+recall,Mann-Whitney vit_50_real_50_synth_50 vs vit_50_real_25_synth_75,805624.0,0.055850439066127446
+recall,Mann-Whitney vit_50_real_50_synth_50 vs vit_50_real_0_synth_100,910333.5,6.179652884411257e-09
+recall,Mann-Whitney vit_50_real_25_synth_75 vs vit_50_real_0_synth_100,938322.0,1.2131240047270021e-14

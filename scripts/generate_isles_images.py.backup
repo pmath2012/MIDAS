@@ -1,0 +1,131 @@
+import os
+import torch
+import pandas as pd
+import numpy as np
+import cv2
+from tqdm import tqdm
+from improved_diffusion.script_util import create_conditional_model_and_diffusion, args_to_dict
+from scripts.train_ms import model_and_diffusion_defaults
+from improved_diffusion.ms_datasets import PERF_LOAD_MAX, PERF_NUM_MAX
+
+# --------- CONFIG ---------
+# Set these paths as needed
+#MODEL_PATH = "/home/prateek/controlled-diffusion/notebooks/models/ema_0.9999_100000.pt"
+MODEL_PATH = "/home/prateek/controlled-diffusion/notebooks/models/ema_0.9999_430000.pt"
+ROOT_DIR = "/mnt/recsys/prateek/Isles2024Dataset_v2/"
+CSV_FILE = "test.csv"
+OUTPUT_DIR = "./isles_gen/diffusion_43k"
+BATCH_SIZE = 32  # Adjust based on your GPU memory
+DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
+
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+def read_and_normalize(root_dir, path, normalize=True, mask=False):
+    img = cv2.imread(os.path.join(root_dir, path), cv2.IMREAD_GRAYSCALE)
+    if mask:
+        img = np.where(img > 128, 1, 0)
+    else:
+        if normalize:
+            img = cv2.normalize(img, None, 0, 1, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+    return img
+
+def get_sample(row, root_dir):
+    mask = read_and_normalize(root_dir, row["label"], mask=True)
+    params = {
+        "lesion_load": torch.tensor(row['lesion_load'] / PERF_LOAD_MAX , dtype=torch.float32),
+        "num_lesions": torch.tensor(row['num_lesions'] / PERF_NUM_MAX , dtype=torch.float32),
+        "lesion": torch.tensor(row['lesion'], dtype=torch.float32),
+    }
+    imgA = read_and_normalize(root_dir, row["path_A"])
+    mask_tensor = torch.from_numpy(mask)
+    img_tensor = torch.from_numpy(imgA).unsqueeze(0)
+    mask_tensor = torch.where(mask_tensor > 0.5, torch.tensor(1.0), torch.tensor(-1.0))
+    mask_tensor = mask_tensor.unsqueeze(0)
+    params["mask"] = mask_tensor
+    params["t0"] = img_tensor
+    return params
+
+def create_batch(samples, device):
+    # Stack all tensors in the batch
+    masks = torch.stack([s["mask"] for s in samples]).to(device)
+    t0s = torch.stack([s["t0"] for s in samples]).to(device)
+    lesion_loads = torch.stack([s["lesion_load"] for s in samples]).to(device)
+    num_lesions = torch.stack([s["num_lesions"] for s in samples]).to(device)
+    lesions = torch.stack([s["lesion"] for s in samples]).to(device)
+    model_kwargs = {
+        "mask": masks,
+        "t0": t0s,
+        "lesion_load": lesion_loads,
+        "num_lesions": num_lesions,
+        "lesion": lesions,
+    }
+    return model_kwargs
+
+def main():
+    # 1. Load model and diffusion
+    defaults = dict(
+        clip_denoised=True,
+        num_samples=1,
+        batch_size=1,
+        use_ddim=False,
+        model_path=MODEL_PATH,
+        output_dir=None,
+        segmentation_model=None,
+        learn_sigma=False,
+        use_fp16=False,
+        csv_file="test.csv",
+        root_dir="/mnt/recsys/prateek/Isles2024Dataset_v2/",
+        image_size=256,
+        rescale_learned_sigmas=False,
+        class_cond=False,
+        
+    )
+    defaults.update(model_and_diffusion_defaults())
+    defaults["rescale_learned_sigmas"] = False
+    defaults["application"]="modality_conversion"
+    args = type('Args', (), defaults)()
+    model, diffusion = create_conditional_model_and_diffusion(
+        **args_to_dict(args, model_and_diffusion_defaults().keys())
+    )
+    checkpoint = torch.load(MODEL_PATH, map_location=DEVICE)
+    new_state_dict = {}
+    for key, value in checkpoint.items():
+        new_key = key[7:] if key.startswith('module.') else key
+        new_state_dict[new_key] = value
+    model.load_state_dict(new_state_dict)
+    model.to(DEVICE)
+    model.eval()
+
+    # 2. Load test dataframe
+    test_df = pd.read_csv(os.path.join(ROOT_DIR, CSV_FILE))
+
+    # 3. Choose sample function
+    sample_fn = diffusion.p_sample_loop  # or diffusion.ddim_sample_loop
+
+    # 4. Generate images in batches
+    filenames = test_df["path_B"].apply(os.path.basename).tolist()
+    results = []
+    for i in tqdm(range(0, len(test_df), BATCH_SIZE)):
+        batch_rows = test_df.iloc[i:i+BATCH_SIZE]
+        samples = [get_sample(row, ROOT_DIR) for _, row in batch_rows.iterrows()]
+        model_kwargs = create_batch(samples, DEVICE)
+        with torch.no_grad():
+            gen_imgs = sample_fn(
+                model,
+                shape=(len(samples), 1, 256, 256),
+                clip_denoised=True,
+                model_kwargs=model_kwargs,
+            )
+        for j, img in enumerate(gen_imgs):
+            img = (img * 255).clamp(0, 255).to(torch.uint8)
+            img = img.permute(1, 2, 0).squeeze().cpu().numpy()
+            filename = os.path.basename(batch_rows.iloc[j]["path_B"])
+            out_path = os.path.join(OUTPUT_DIR, filename)
+            if not cv2.imwrite(out_path, img):
+                print(f"Error writing {out_path}")
+            results.append({"filename": filename})
+    # Optionally save results as CSV
+    pd.DataFrame(results).to_csv(os.path.join(OUTPUT_DIR, "results.csv"), index=False)
+
+if __name__ == "__main__":
+    main() 
