@@ -11,11 +11,10 @@ from improved_diffusion.ms_datasets import PERF_LOAD_MAX, PERF_NUM_MAX
 
 # --------- CONFIG ---------
 # Set these paths as needed
-#MODEL_PATH = "/home/prateek/controlled-diffusion/notebooks/models/ema_0.9999_100000.pt"
-MODEL_PATH = "/mnt/recsys/prateek/models/controlled_diff_ct2mri/ema_0.9999_430000.pt"
-ROOT_DIR = "/mnt/recsys/prateek/Isles2024Dataset_v2/"
-CSV_FILE = "synthetic_train.csv"
-OUTPUT_DIR = "./isles_gen/diffusion_43k_synthetic"
+MODEL_PATH = "/path/to/model.pt/"
+ROOT_DIR = "/path/to/data/"
+CSV_FILE = "train.csv"
+OUTPUT_DIR = "/path/to/output"
 BATCH_SIZE = 64  # Slightly increased for better GPU utilization
 DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
 NUM_WORKERS = 4  # For parallel image loading
@@ -146,7 +145,7 @@ def main():
         learn_sigma=False,
         use_fp16=False,  # Keep FP32 for image quality
         csv_file="test.csv",
-        root_dir="/mnt/recsys/prateek/Isles2024Dataset_v2/",
+        root_dir="/path/to/data/",
         image_size=256,
         rescale_learned_sigmas=False,
         class_cond=False,
